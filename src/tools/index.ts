@@ -7,6 +7,7 @@ import {registerListBenefits} from './list-benefits.js';
 import {registerListCurrencies} from './list-currencies.js';
 import {registerListTransactions} from './list-transactions.js';
 import {registerGetExpense} from './get-expense.js';
+import {registerGetBenefitSchedule} from './get-benefit-schedule.js';
 import {registerGetSubstantiationRequirements} from './get-substantiation-requirements.js';
 import {registerUploadReceipt} from './upload-receipt.js';
 import {registerSubmitExpense} from './submit-expense.js';
@@ -20,6 +21,7 @@ export function registerAll(server: McpServer): void {
 	registerListCurrencies(server);
 	registerListTransactions(server);
 	registerGetExpense(server);
+	registerGetBenefitSchedule(server);
 	registerGetSubstantiationRequirements(server);
 	registerUploadReceipt(server);
 	registerSubmitExpense(server);

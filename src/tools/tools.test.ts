@@ -12,6 +12,7 @@ describe('createServer', () => {
 		const tools = (server as unknown as {_registeredTools: Record<string, unknown>})._registeredTools;
 		expect(Object.keys(tools).sort()).toEqual([
 			'complete_login',
+			'get_benefit_schedule',
 			'get_expense',
 			'get_substantiation_requirements',
 			'list_accounts',

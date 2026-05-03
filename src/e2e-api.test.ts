@@ -86,6 +86,7 @@ describe.skipIf(!REFRESH_TOKEN)('e2e: Benepass read-only API', () => {
 		});
 		expect(result.tools.map((t) => t.name).sort()).toEqual([
 			'complete_login',
+			'get_benefit_schedule',
 			'get_expense',
 			'get_substantiation_requirements',
 			'list_accounts',
@@ -167,6 +168,22 @@ describe.skipIf(!REFRESH_TOKEN)('e2e: Benepass read-only API', () => {
 		};
 		expect(reqs.data?.length ?? 0).toBeGreaterThan(0);
 		expect(reqs.data!.every((p) => typeof p.item_type === 'string')).toBe(true);
+	}, 30_000);
+
+	test('get_benefit_schedule returns events + rollover for an account', async () => {
+		const benefits = await callTool(client, 'list_benefits') as {data?: {id: string; account_id: string}[]};
+		const accountId = benefits.data?.[0]?.account_id;
+		if (!accountId) {
+			return;
+		}
+
+		const sched = await callTool(client, 'get_benefit_schedule', {account_id: accountId}) as {
+			account_id: string;
+			events: unknown[];
+			expires_at_period_end?: boolean;
+		};
+		expect(sched.account_id).toBe(accountId);
+		expect(Array.isArray(sched.events)).toBe(true);
 	}, 30_000);
 
 	test('get_expense fetches a transaction by id from list_transactions', async () => {
