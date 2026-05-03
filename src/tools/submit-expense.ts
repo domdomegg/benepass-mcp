@@ -28,10 +28,13 @@ async function resolveCurrencyId(
 		return currency;
 	}
 
-	const list = await apiGet(auth, '/v2/me/currencies/') as CurrencyList;
+	// Benepass paginates currencies 20-at-a-time by default; bumping page_size returns all
+	// 150 in one shot. The friendly ISO letter code is `code` (e.g. "USD"); `iso_code` is
+	// the numeric form (e.g. "840") which agents won't know.
+	const list = await apiGet(auth, '/v2/me/currencies/', {page_size: 200}) as CurrencyList;
+	const wanted = currency.toUpperCase();
 	for (const c of list.data ?? list.results ?? []) {
-		const code = c.iso_code ?? c.code;
-		if (code && code.toUpperCase() === currency.toUpperCase()) {
+		if (c.code?.toUpperCase() === wanted || c.iso_code?.toUpperCase() === wanted) {
 			return c.id;
 		}
 	}
