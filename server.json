@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.domdomegg/benepass-mcp",
+  "title": "Benepass",
+  "description": "Browse and submit Benepass benefits, transactions, and reimbursable expenses.",
+  "websiteUrl": "https://github.com/domdomegg/benepass-mcp#readme",
+  "repository": {
+    "url": "https://github.com/domdomegg/benepass-mcp.git",
+    "source": "github"
+  },
+  "version": "{{VERSION}}",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "benepass-mcp",
+      "version": "{{VERSION}}",
+      "runtimeHint": "npx",
+      "environmentVariables": [],
+      "transport": {
+        "type": "stdio"
+      }
+    },
+    {
+      "registryType": "npm",
+      "identifier": "benepass-mcp",
+      "version": "{{VERSION}}",
+      "runtimeHint": "npx",
+      "environmentVariables": [
+        {
+          "name": "MCP_TRANSPORT",
+          "description": "Transport type.",
+          "isRequired": true,
+          "isSecret": false,
+          "value": "http"
+        }
+      ],
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:3000/mcp"
+      }
+    }
+  ]
+}
