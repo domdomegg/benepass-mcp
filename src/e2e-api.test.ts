@@ -87,6 +87,7 @@ describe.skipIf(!REFRESH_TOKEN)('e2e: Benepass read-only API', () => {
 		expect(result.tools.map((t) => t.name).sort()).toEqual([
 			'complete_login',
 			'get_benefit_schedule',
+			'get_current_user',
 			'get_expense',
 			'get_substantiation_requirements',
 			'list_accounts',
@@ -99,6 +100,16 @@ describe.skipIf(!REFRESH_TOKEN)('e2e: Benepass read-only API', () => {
 			'upload_receipt',
 		]);
 	}, 10_000);
+
+	test('get_current_user returns id, email and locale info', async () => {
+		const me = await callTool(client, 'get_current_user') as {
+			id?: string; email?: string; country?: {abbreviation?: string}; timezone?: {name?: string};
+		};
+		expect(me.id).toMatch(/^user_/);
+		expect(me.email).toMatch(/@/);
+		expect(typeof me.country?.abbreviation).toBe('string');
+		expect(typeof me.timezone?.name).toBe('string');
+	}, 30_000);
 
 	test('list_workspaces returns at least one workspace', async () => {
 		const body = await callTool(client, 'list_workspaces') as {data?: {id: string; type: string}[]};

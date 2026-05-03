@@ -13,6 +13,7 @@ describe('createServer', () => {
 		expect(Object.keys(tools).sort()).toEqual([
 			'complete_login',
 			'get_benefit_schedule',
+			'get_current_user',
 			'get_expense',
 			'get_substantiation_requirements',
 			'list_accounts',
