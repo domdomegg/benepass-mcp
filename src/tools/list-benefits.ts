@@ -9,39 +9,26 @@ const inputSchema = strictSchemaWithAliases({
 	workspace_id: workspaceIdSchema,
 });
 
-type Account = {id: string; key?: string};
+type Balance = {key?: string; amount?: number; formatted_local_amount?: string};
+type Account = {
+	id: string;
+	key?: string;
+	enrollment?: {
+		benefit?: {id?: string; name?: string; benefit_type?: string};
+		max_expense_amount?: number;
+		local_max_expense_amount?: number;
+	};
+	balances?: Balance[];
+};
 type AccountList = {data?: Account[]; results?: Account[]};
-type SubstantiationPolicy = {policy_group?: {name?: string}};
-type SubstantiationList = {data?: SubstantiationPolicy[]; results?: SubstantiationPolicy[]};
 
-function extractBenefitId(accountKey: string | undefined): string | undefined {
-	if (!accountKey) {
+function findAvailableBalance(balances: Balance[] | undefined): Balance | undefined {
+	if (!balances) {
 		return undefined;
 	}
 
-	for (const part of accountKey.split('/')) {
-		if (part.startsWith('benefit_')) {
-			return part;
-		}
-	}
-
-	return undefined;
-}
-
-/** Best-effort extraction of a friendly benefit name from a substantiation_policy_group name like
- *  "Anthropic > Work from Home - Annual > note: user". */
-function extractBenefitName(policyGroupName: string | undefined): string | undefined {
-	if (!policyGroupName) {
-		return undefined;
-	}
-
-	const parts = policyGroupName.split('>').map((s) => s.trim());
-	// Drop leading employer prefix and trailing "<item_type>: <policy_type>" suffix
-	if (parts.length >= 3) {
-		return parts.slice(1, -1).join(' > ');
-	}
-
-	return policyGroupName;
+	// Pick the bare /available balance (Benepass also has reimbursement/available, payout/available, etc.)
+	return balances.find((b) => b.key?.endsWith('/available'));
 }
 
 export function registerListBenefits(server: McpServer): void {
@@ -49,7 +36,7 @@ export function registerListBenefits(server: McpServer): void {
 		'list_benefits',
 		{
 			title: 'List benefits',
-			description: 'List the benefits the user is enrolled in (e.g. "Work from Home", "Health & Wellness", "Commuter") with their `benefit_xxx` ids and best-effort friendly names. Each benefit id can be passed to `submit_expense` and `get_substantiation_requirements`.',
+			description: 'List the benefits the user is enrolled in (e.g. "Work from Home", "Wellness", "Commuter") with their `benefit_xxx` ids, names, available balances, and per-expense caps. Pass a `benefit_id` to `submit_expense` and `get_substantiation_requirements`.',
 			inputSchema,
 			annotations: {
 				readOnlyHint: true,
@@ -58,27 +45,26 @@ export function registerListBenefits(server: McpServer): void {
 		async (args) => {
 			const auth = await resolveAuth(args);
 
-			// Benepass has no /v2/me/benefits/ list endpoint. Instead we derive benefits
-			// from /v2/me/accounts/ — each account's `key` is `emp_xxx/benefit_xxx` —
-			// then resolve names from /v2/me/benefits/{id}/substantiation-requirements/
-			// (the only endpoint that returns benefit-scoped name metadata).
+			// Benepass has no /v2/me/benefits/ list endpoint. Benefit metadata lives
+			// inside each /v2/me/accounts/ entry's `enrollment.benefit` field.
 			const accountList = await apiGet(auth, '/v2/me/accounts/') as AccountList;
 			const accounts = accountList.data ?? accountList.results ?? [];
 
-			const benefitIds = [...new Set(accounts.map((a) => extractBenefitId(a.key)).filter((id): id is string => Boolean(id)))];
-
-			const lookup = async (id: string): Promise<{id: string; name: string | null}> => {
-				try {
-					const reqs = await apiGet(auth, `/v2/me/benefits/${id}/substantiation-requirements/`) as SubstantiationList;
-					const policies = reqs.data ?? reqs.results ?? [];
-					const name = extractBenefitName(policies[0]?.policy_group?.name);
-					return {id, name: name ?? null};
-				} catch {
-					return {id, name: null};
-				}
-			};
-
-			const benefits = await Promise.all(benefitIds.map(lookup));
+			const benefits = accounts
+				.filter((a) => a.enrollment?.benefit?.id)
+				.map((a) => {
+					const benefit = a.enrollment!.benefit!;
+					const available = findAvailableBalance(a.balances);
+					return {
+						id: benefit.id!,
+						name: benefit.name ?? null,
+						benefit_type: benefit.benefit_type ?? null,
+						account_id: a.id,
+						available_balance: available?.amount ?? null,
+						formatted_available_balance: available?.formatted_local_amount ?? null,
+						max_per_expense: a.enrollment?.local_max_expense_amount ?? a.enrollment?.max_expense_amount ?? null,
+					};
+				});
 
 			return jsonResult({data: benefits});
 		},
