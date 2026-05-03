@@ -1,6 +1,6 @@
 {
   "name": "benepass-mcp",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "MCP server for the Benepass employee benefits platform — list benefits, transactions, and submit out-of-pocket expenses for reimbursement.",
   "license": "MIT",
   "author": "Adam Jones (domdomegg)",
