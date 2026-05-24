@@ -11,9 +11,12 @@ describe('createServer', () => {
 
 		const tools = (server as unknown as {_registeredTools: Record<string, unknown>})._registeredTools;
 		expect(Object.keys(tools).sort()).toEqual([
+			'add_hsa_investment_asset_link',
 			'call_api',
 			'complete_login',
 			'convert_currency',
+			'delete_expense',
+			'download_document',
 			'get_benefit_schedule',
 			'get_card',
 			'get_current_user',
@@ -39,9 +42,24 @@ describe('createServer', () => {
 			'list_tasks',
 			'list_transactions',
 			'list_workspaces',
+			'make_hsa_investment_deposit',
+			'make_hsa_investment_withdrawal',
+			'order_card',
+			'reclassify_transaction',
+			'remove_hsa_investment_asset_link',
+			'request_account_payout',
+			'request_hsa_transfer_form',
+			'reset_card_pin',
+			'set_card_status',
+			'skip_onboarding_step',
 			'start_login',
 			'submit_expense',
+			'submit_form',
+			'submit_hsa_investment_account',
+			'submit_onboarding_step',
 			'update_expense',
+			'update_hsa_investment_allocation',
+			'update_user_preferences',
 			'upload_receipt',
 		]);
 	});

@@ -165,6 +165,10 @@ export async function apiPostMultipart(auth: ApiCallArgs, endpoint: string, form
 	return apiRequest(auth, endpoint, {multipart: formData});
 }
 
+export async function apiDelete(auth: ApiCallArgs, endpoint: string): Promise<unknown> {
+	return apiRequest(auth, endpoint, {method: 'DELETE'});
+}
+
 /**
  * Generic request with an arbitrary HTTP method. Backs the `call_api` escape-hatch
  * tool — the typed helpers above (apiGet/apiPostJson/...) are preferred for known

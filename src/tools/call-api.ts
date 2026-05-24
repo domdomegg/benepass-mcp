@@ -45,7 +45,24 @@ Known read-only \`/v2/me/*\` endpoints include:
 - GET /v2/me/onboardings/ , GET /v2/me/onboardings/{onboarding_id}/ — onboardings
 - GET /v2/me/hsa-account-details/ — US HSA account details
 
-Dedicated tools also exist for accounts, benefits, currencies, transactions, expenses, workspaces, and substantiation — prefer those when available.`,
+Known write \`/v2/me/*\` endpoints include:
+
+- POST /v2/me/expenses/ — submit an expense ; DELETE /v2/me/expenses/{expense_id}/ — withdraw an expense
+- PATCH /v2/me/claims/{claim_id}/ — update an expense's substantiation
+- PATCH /v2/me/transactions/{transaction_id}/ — reclassify a transaction to a different benefit account ({account})
+- POST /v2/me/cards/ — order a card ; PATCH /v2/me/cards/{card_id}/ — set card status ({status}) ; POST /v2/me/cards/{card_id}/reset-pin/ — reset PIN
+- POST /v2/me/documents/{document_id}/download/ — request a document download
+- POST /v2/me/forms/{form_id}/submissions/ — submit a form
+- POST /v2/me/accounts/{account_id}/payouts/ — request a benefit account payout
+- PATCH /v2/me/ — update user preferences
+- POST /v2/me/hsa-transfer-form/ — request an HSA transfer form (US HSA)
+- POST /v2/me/onboardings/{slug}/steps/{step}/submit/ , .../skip/ — submit or skip an onboarding step
+- POST/DELETE /v2/me/accounts/{account_id}/hsa-investments/asset-links/[{link_id}/] — add/remove an HSA investment asset link (US HSA)
+- POST /v2/me/accounts/{account_id}/hsa-investments/deposits/ , .../withdrawals/ — HSA investment deposit/withdrawal (US HSA)
+- PATCH /v2/me/accounts/{account_id}/hsa-investments/portfolio/allocation/ — update HSA investment allocation (US HSA)
+- POST /v2/me/accounts/{account_id}/hsa-investments/account/submissions/ — submit HSA investment account application (US HSA)
+
+Dedicated tools exist for all of the above, plus accounts, benefits, currencies, transactions, expenses, cards, documents, forms, payouts, onboardings, workspaces, and substantiation — prefer those when available.`,
 			inputSchema,
 			annotations: {
 				readOnlyHint: false,

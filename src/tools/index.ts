@@ -31,6 +31,24 @@ import {registerListIdentities} from './list-identities.js';
 import {registerListOnboardings} from './list-onboardings.js';
 import {registerGetOnboarding} from './get-onboarding.js';
 import {registerGetHsaAccountDetails} from './get-hsa-account-details.js';
+import {registerReclassifyTransaction} from './reclassify-transaction.js';
+import {registerDeleteExpense} from './delete-expense.js';
+import {registerOrderCard} from './order-card.js';
+import {registerSetCardStatus} from './set-card-status.js';
+import {registerResetCardPin} from './reset-card-pin.js';
+import {registerDownloadDocument} from './download-document.js';
+import {registerSubmitForm} from './submit-form.js';
+import {registerRequestAccountPayout} from './request-account-payout.js';
+import {registerRequestHsaTransferForm} from './request-hsa-transfer-form.js';
+import {registerUpdateUserPreferences} from './update-user-preferences.js';
+import {registerSubmitOnboardingStep} from './submit-onboarding-step.js';
+import {registerSkipOnboardingStep} from './skip-onboarding-step.js';
+import {registerAddHsaInvestmentAssetLink} from './add-hsa-investment-asset-link.js';
+import {registerRemoveHsaInvestmentAssetLink} from './remove-hsa-investment-asset-link.js';
+import {registerMakeHsaInvestmentDeposit} from './make-hsa-investment-deposit.js';
+import {registerMakeHsaInvestmentWithdrawal} from './make-hsa-investment-withdrawal.js';
+import {registerUpdateHsaInvestmentAllocation} from './update-hsa-investment-allocation.js';
+import {registerSubmitHsaInvestmentAccount} from './submit-hsa-investment-account.js';
 
 export function registerAll(server: McpServer): void {
 	registerStartLogin(server);
@@ -65,4 +83,22 @@ export function registerAll(server: McpServer): void {
 	registerListOnboardings(server);
 	registerGetOnboarding(server);
 	registerGetHsaAccountDetails(server);
+	registerReclassifyTransaction(server);
+	registerDeleteExpense(server);
+	registerOrderCard(server);
+	registerSetCardStatus(server);
+	registerResetCardPin(server);
+	registerDownloadDocument(server);
+	registerSubmitForm(server);
+	registerRequestAccountPayout(server);
+	registerRequestHsaTransferForm(server);
+	registerUpdateUserPreferences(server);
+	registerSubmitOnboardingStep(server);
+	registerSkipOnboardingStep(server);
+	registerAddHsaInvestmentAssetLink(server);
+	registerRemoveHsaInvestmentAssetLink(server);
+	registerMakeHsaInvestmentDeposit(server);
+	registerMakeHsaInvestmentWithdrawal(server);
+	registerUpdateHsaInvestmentAllocation(server);
+	registerSubmitHsaInvestmentAccount(server);
 }
