@@ -157,6 +157,29 @@ export async function apiPostJson(auth: ApiCallArgs, endpoint: string, body: unk
 	return apiRequest(auth, endpoint, {json: body});
 }
 
+export async function apiPatchJson(auth: ApiCallArgs, endpoint: string, body: unknown): Promise<unknown> {
+	return apiRequest(auth, endpoint, {method: 'PATCH', json: body});
+}
+
 export async function apiPostMultipart(auth: ApiCallArgs, endpoint: string, formData: FormData): Promise<unknown> {
 	return apiRequest(auth, endpoint, {multipart: formData});
+}
+
+/**
+ * Generic request with an arbitrary HTTP method. Backs the `call_api` escape-hatch
+ * tool — the typed helpers above (apiGet/apiPostJson/...) are preferred for known
+ * endpoints. Honours `params` (query) and `json` (request body) like the others.
+ */
+export async function apiCall(
+	auth: ApiCallArgs,
+	method: string,
+	endpoint: string,
+	params?: Record<string, string | number | undefined | null>,
+	json?: unknown,
+): Promise<unknown> {
+	return apiRequest(auth, endpoint, {
+		method,
+		...(params !== undefined ? {params} : {}),
+		...(json !== undefined ? {json} : {}),
+	});
 }
