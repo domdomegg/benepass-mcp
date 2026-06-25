@@ -16,7 +16,7 @@ MCP server for the [Benepass](https://www.getbenepass.com/) employee benefits pl
 
 ## Setup
 
-Follow the up-to-date instructions on [install-mcp](https://adamjones.me/install-mcp/?config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImJlbmVwYXNzLW1jcCJdLCJuYW1lIjoiYmVuZXBhc3MifQ==), which generates the right config for your MCP client (Claude Code, Claude Desktop, Cursor, Cline, VS Code, and more).
+Follow the instructions on [install-mcp](https://adamjones.me/install-mcp/?config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImJlbmVwYXNzLW1jcCJdLCJuYW1lIjoiYmVuZXBhc3MifQ==), which generates the right config for your MCP client (Claude Code, Claude Desktop, Cursor, Cline, VS Code, and more).
 
 There's no API key or token to configure. When you ask the agent to do something Benepass-related, it'll:
 
