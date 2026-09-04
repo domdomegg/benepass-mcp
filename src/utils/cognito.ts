@@ -40,12 +40,60 @@ async function callCognitoIdp<T>(target: 'InitiateAuth' | 'RespondToAuthChalleng
 	return JSON.parse(text) as T;
 }
 
-/** Start the email-OTP login. Cognito triggers a CUSTOM_CHALLENGE that emails an OTP. */
+/** The protocol the `protocol_selector` challenge must be answered with to get an emailed code.
+ *
+ * Benepass's sign-on app (signon.benefitsapi.com) offers `email_code_v0` and, where the account has
+ * it enabled, a magic link. We always pick the code: an MCP client can be handed six digits, but it
+ * cannot click a link in a mailbox.
+ */
+const EMAIL_CODE_PROTOCOL = 'email_code_v0';
+const PROTOCOL_SELECTOR_SCHEMA_VERSION = '1';
+
+/** Is this challenge the protocol selector rather than the OTP prompt? */
+function isProtocolSelector(challenge: ChallengeResponse): boolean {
+	const params = challenge.ChallengeParameters ?? {};
+	return params.challenge_type === 'protocol_selector'
+		&& params.schema_version === PROTOCOL_SELECTOR_SCHEMA_VERSION
+		&& typeof challenge.Session === 'string';
+}
+
+/** Start the email-OTP login. Cognito triggers a CUSTOM_CHALLENGE that emails an OTP.
+ *
+ * Benepass's custom auth is TWO challenges, not one. `InitiateAuth` returns a `protocol_selector`
+ * challenge asking which delivery method to use; **no email is sent until that is answered**. Only
+ * then does the OTP challenge (and the actual email) arrive. Answering the selector here keeps the
+ * two-stage flow an implementation detail: callers still get back a session to pair with the code.
+ *
+ * The selector is skipped when absent, so this stays correct for accounts or future schema versions
+ * that go straight to the OTP challenge.
+ */
 export async function initiateAuth(email: string): Promise<ChallengeResponse> {
-	return callCognitoIdp<ChallengeResponse>('InitiateAuth', {
+	const challenge = await callCognitoIdp<ChallengeResponse>('InitiateAuth', {
 		AuthFlow: 'CUSTOM_AUTH',
 		ClientId: CLIENT_ID,
 		AuthParameters: {USERNAME: email},
+	});
+
+	if (!isProtocolSelector(challenge)) {
+		return challenge;
+	}
+
+	// Mirrors the sign-on app: the challenge parameters are echoed back into ChallengeResponses
+	// alongside USERNAME + ANSWER, and the chosen protocol is repeated in ClientMetadata (which is
+	// what the Create-Auth-Challenge Lambda reads to decide what to send).
+	return callCognitoIdp<ChallengeResponse>('RespondToAuthChallenge', {
+		ChallengeName: 'CUSTOM_CHALLENGE',
+		ClientId: CLIENT_ID,
+		Session: challenge.Session,
+		ChallengeResponses: {
+			...challenge.ChallengeParameters,
+			USERNAME: email,
+			ANSWER: EMAIL_CODE_PROTOCOL,
+		},
+		ClientMetadata: {
+			protocol: EMAIL_CODE_PROTOCOL,
+			schema_version: PROTOCOL_SELECTOR_SCHEMA_VERSION,
+		},
 	});
 }
 
