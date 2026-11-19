@@ -1,7 +1,5 @@
 import type {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {z} from 'zod';
-import {readFile} from 'node:fs/promises';
-import {basename} from 'node:path';
 import {jsonResult} from '../utils/response.js';
 import {strictSchemaWithAliases} from '../utils/schema.js';
 import {apiPostMultipart} from '../utils/benepass-api.js';
@@ -21,9 +19,8 @@ const MIME_BY_EXT: Record<string, string> = {
 const inputSchema = strictSchemaWithAliases({
 	refresh_token: refreshTokenSchema,
 	workspace_id: workspaceIdSchema,
-	file_path: z.string().min(1).optional().describe('Absolute path to a receipt file on disk. Either this or file_content_base64 is required.'),
-	file_content_base64: z.string().min(1).optional().describe('Receipt file as base64-encoded bytes. Use when the file isn\'t on the local filesystem. Requires `filename`.'),
-	filename: z.string().min(1).optional().describe('Filename including extension (e.g. "receipt.jpeg"). Required when using file_content_base64; defaults to the basename of file_path otherwise.'),
+	file_content_base64: z.string().min(1).describe('Receipt file as base64-encoded bytes.'),
+	filename: z.string().min(1).describe('Filename including extension (e.g. "receipt.jpeg").'),
 	mime_type: z.string().min(1).optional().describe('MIME type (e.g. image/jpeg, application/pdf). Auto-detected from the filename extension if omitted; falls back to application/octet-stream.'),
 });
 
@@ -50,28 +47,8 @@ Note: the presigned URL is short-lived (expires in ~5 minutes), so call \`submit
 			},
 		},
 		async (args) => {
-			if (args.file_path && args.file_content_base64) {
-				throw new Error('Pass `file_path` OR `file_content_base64`, not both.');
-			}
-
-			if (!args.file_path && !args.file_content_base64) {
-				throw new Error('Either `file_path` or `file_content_base64` must be provided.');
-			}
-
-			let bytes: Buffer;
-			let filename: string;
-
-			if (args.file_path) {
-				bytes = await readFile(args.file_path);
-				filename = args.filename ?? basename(args.file_path);
-			} else {
-				if (!args.filename) {
-					throw new Error('`filename` is required when uploading via `file_content_base64`.');
-				}
-
-				bytes = Buffer.from(args.file_content_base64, 'base64');
-				filename = args.filename;
-			}
+			const bytes = Buffer.from(args.file_content_base64, 'base64');
+			const {filename} = args;
 
 			if (bytes.length > MAX_BYTES) {
 				throw new Error(`Receipt is ${(bytes.length / 1024 / 1024).toFixed(1)} MB, which exceeds Benepass's 10 MB limit.`);
